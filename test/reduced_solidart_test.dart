@@ -2,8 +2,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_solidart/flutter_solidart.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reduced/reduced.dart';
-// ignore: implementation_imports
-import 'package:solidart/src/core/signal_selector.dart';
 
 import 'package:reduced_solidart/reduced_solidart.dart';
 
