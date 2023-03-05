@@ -13,10 +13,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_solidart: ^0.3.0
-  reduced:
-    git:
-      url: https://github.com/partmaster/reduced.git
-      ref: main
+  reduced: ^0.1.0
   solidart: ^0.2.2
 
 dev_dependencies:
