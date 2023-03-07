@@ -1,16 +1,16 @@
-// solidart_reducible.dart
+// solidart_store.dart
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_solidart/flutter_solidart.dart';
 import 'package:reduced/reduced.dart';
 
-/// Extension on class [Signal] with support of the [Reducible] interface.
-extension ReducibleSignal<S> on Signal<S> {
+/// Extension on class [Signal] with support of the [ReducedStore] interface.
+extension ReducedStoreSignal<S> on Signal<S> {
   S getState() => value;
 
   void reduce(Reducer<S> reducer) => value = reducer(value);
 
-  Reducible<S> get reducible => ReducibleProxy(getState, reduce, this);
+  ReducedStore<S> get store => ReducedStoreProxy(getState, reduce, this);
 }
 
 extension ExtensionSignalOnBuildContext on BuildContext {

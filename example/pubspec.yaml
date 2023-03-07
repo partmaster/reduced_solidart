@@ -1,7 +1,7 @@
 name: example
 description: Example app for reduced_solidart.
 publish_to: 'none' 
-version: 0.1.0+1
+version: 0.2.1+2
 
 environment:
   sdk: '>=2.19.3 <3.0.0'
@@ -9,7 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  reduced: ^0.1.0
+  reduced: 0.2.1
   reduced_solidart: 
     path: ../
 

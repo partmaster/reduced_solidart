@@ -7,26 +7,27 @@
 
 Implementation of the 'reduced' API for the 'Solidart' state management framework with following features:
 
-1. Implementation of the ```Reducible``` interface 
-2. Extension on the ```BuildContext``` for convenient access to the  ```Reducible``` instance.
+1. Implementation of the ```ReducedStore``` interface 
+2. Extension on the ```BuildContext``` for convenient access to the  ```ReducedStore``` instance.
 3. Register a state for management.
 4. Trigger a rebuild on widgets selectively after a state change.
 
 ## Features
 
-#### 1. Implementation of the ```Reducible``` interface 
+#### 1. Implementation of the ```ReducedStore``` interface 
 
 ```dart
-extension ReducibleSignal<S> on Signal<S> {
+extension ReducedStoreSignal<S> on Signal<S> {
   S getState() => value;
 
   void reduce(Reducer<S> reducer) => value = reducer(value);
 
-  Reducible<S> get reducible => ReducibleProxy(getState, reduce, this);
+  ReducedStore<S> get store =>
+      ReducedStoreProxy(getState, reduce, this);
 }
 ```
 
-#### 2. Extension on the ```BuildContext``` for convenient access to the  ```Reducible``` instance.
+#### 2. Extension on the ```BuildContext``` for convenient access to the  ```ReducedStore``` instance.
 
 ```dart
 extension ExtensionSignalOnBuildContext on BuildContext {
@@ -37,47 +38,50 @@ extension ExtensionSignalOnBuildContext on BuildContext {
 #### 3. Register a state for management.
 
 ```dart
-Widget wrapWithProvider<S>({
-  required S initialState,
-  required Widget child,
-}) =>
-    Solid(
-      signals: {S: () => createSignal<S>(initialState)},
-      child: child,
-    );
+class ReducedProvider<S> extends StatelessWidget {
+  const ReducedProvider({
+    super.key,
+    required this.initialState,
+    required this.child,
+  });
+
+  final S initialState;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Solid(
+        signals: {S: () => createSignal<S>(initialState)},
+        child: child,
+      );
+}
 ```
 
 #### 4. Trigger a rebuild on widgets selectively after a state change.
 
 ```dart
-Widget wrapWithConsumer<S, P>({
-  required ReducedTransformer<S, P> transformer,
-  required ReducedWidgetBuilder<P> builder,
-}) =>
-    Builder(
-        builder: (context) => internalWrapWithConsumer(
-              signal: context.signal<S>(),
-              transformer: transformer,
-              builder: builder,
-            ));
-```
+class ReducedConsumer<S, P> extends StatelessWidget {
+  const ReducedConsumer({
+    super.key,
+    required this.transformer,
+    required this.builder,
+  });
 
-```dart
-SignalBuilder<P> internalWrapWithConsumer<S, P>({
-  required Signal<S> signal,
-  required ReducedTransformer<S, P> transformer,
-  required ReducedWidgetBuilder<P> builder,
-}) =>
-    SignalBuilder<P>(
-      signal: SignalSelector<S, P>(
-        signal: signal,
-        selector: (_) => transformer(signal.reducible),
-        options: SignalOptions(comparator: (a, b) => a == b),
-      ),
-      builder: (_, P value, ___) => builder(props: value),
-    );
-```
+  final ReducedTransformer<S, P> transformer;
+  final ReducedWidgetBuilder<P> builder;
 
+  @override
+  Widget build(BuildContext context) => _build(context.signal<S>());
+
+  Widget _build(Signal<S> signal) => SignalBuilder<P>(
+        signal: SignalSelector<S, P>(
+          signal: signal,
+          selector: (_) => transformer(signal.store),
+          options: SignalOptions(comparator: (a, b) => a == b),
+        ),
+        builder: (_, P value, ___) => builder(props: value),
+      );
+}
+```
 
 ## Getting started
 
@@ -85,8 +89,8 @@ In the pubspec.yaml add dependencies on the package 'reduced' and on the package
 
 ```
 dependencies:
-  reduced: ^0.1.0
-  reduced_solidart: ^0.1.0
+  reduced: 0.2.1
+  reduced_solidart: 0.2.1
 ```
 
 Import package 'reduced' to implement the logic.
@@ -123,9 +127,9 @@ class Props {
 }
 
 class PropsTransformer {
-  static Props transform(Reducible<int> reducible) => Props(
-        counterText: '${reducible.state}',
-        onPressed: CallableAdapter(reducible, Incrementer()),
+  static Props transform(ReducedStore<int> store) => Props(
+        counterText: '${store.state}',
+        onPressed: CallableAdapter(store, Incrementer()),
       );
 }
 
@@ -172,11 +176,11 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) => wrapWithProvider(
+  Widget build(BuildContext context) => ReducedProvider(
         initialState: 0,
         child: MaterialApp(
           theme: ThemeData(primarySwatch: Colors.blue),
-          home: wrapWithConsumer(
+          home: const ReducedConsumer(
             transformer: PropsTransformer.transform,
             builder: MyHomePage.new,
           ),
