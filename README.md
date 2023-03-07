@@ -62,7 +62,7 @@ Widget wrapWithConsumer<S, P>({
             ));
 ```
 
-dart```
+```dart
 SignalBuilder<P> internalWrapWithConsumer<S, P>({
   required Signal<S> signal,
   required ReducedTransformer<S, P> transformer,
