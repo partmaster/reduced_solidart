@@ -17,17 +17,28 @@ Widget wrapWithProvider<S>({
       child: child,
     );
 
-extension WrapWithConsumer<S> on Signal<S> {
-  Widget wrapWithConsumer<P>({
-    required ReducedTransformer<S, P> transformer,
-    required ReducedWidgetBuilder<P> builder,
-  }) =>
-      SignalBuilder(
-        signal: SignalSelector<S, P>(
-          signal: this,
-          selector: (_) => transformer(reducible),
-          options: SignalOptions(comparator: (a, b) => a == b),
-        ),
-        builder: (_, P value, ___) => builder(props: value),
-      );
-}
+Widget wrapWithConsumer<S, P>({
+  required ReducedTransformer<S, P> transformer,
+  required ReducedWidgetBuilder<P> builder,
+}) =>
+    Builder(
+        builder: (context) => internalWrapWithConsumer(
+              signal: context.signal<S>(),
+              transformer: transformer,
+              builder: builder,
+            ));
+
+@visibleForTesting
+SignalBuilder<P> internalWrapWithConsumer<S, P>({
+  required Signal<S> signal,
+  required ReducedTransformer<S, P> transformer,
+  required ReducedWidgetBuilder<P> builder,
+}) =>
+    SignalBuilder<P>(
+      signal: SignalSelector<S, P>(
+        signal: signal,
+        selector: (_) => transformer(signal.reducible),
+        options: SignalOptions(comparator: (a, b) => a == b),
+      ),
+      builder: (_, P value, ___) => builder(props: value),
+    );

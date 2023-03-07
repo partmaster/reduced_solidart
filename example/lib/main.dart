@@ -14,11 +14,9 @@ class MyApp extends StatelessWidget {
         initialState: 0,
         child: MaterialApp(
           theme: ThemeData(primarySwatch: Colors.blue),
-          home: Builder(
-            builder: (context) => context.signal<int>().wrapWithConsumer(
-                  transformer: PropsTransformer.transform,
-                  builder: MyHomePage.new,
-                ),
+          home: wrapWithConsumer(
+            transformer: PropsTransformer.transform,
+            builder: MyHomePage.new,
           ),
         ),
       );

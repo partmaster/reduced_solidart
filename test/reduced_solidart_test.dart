@@ -43,7 +43,8 @@ void main() {
   test('wrapWithConsumer', () {
     final signal = Signal(0);
     const child = SizedBox();
-    final objectUnderTest = signal.wrapWithConsumer(
+    final objectUnderTest = internalWrapWithConsumer(
+      signal: signal,
       builder: ({Key? key, required int props}) => child,
       transformer: (reducible) => 1,
     );
