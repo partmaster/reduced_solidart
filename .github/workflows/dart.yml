@@ -30,3 +30,19 @@ jobs:
 
       - name: Run tests
         run: flutter test
+
+#      - name: Analyze example/counter_app source
+#        working-directory: example/counter_app
+#        run: dart analyze
+
+      - name: Run example/counter_app tests
+        working-directory: example/counter_app
+        run: flutter test
+
+#      - name: Analyze example/counter_app_with_selective_rebuild source
+#        working-directory: example/counter_app_with_selective_rebuild
+#        run: dart analyze
+
+      - name: Run example/counter_app_with_selective_rebuild tests
+        working-directory: example/counter_app_with_selective_rebuild
+        run: flutter test
