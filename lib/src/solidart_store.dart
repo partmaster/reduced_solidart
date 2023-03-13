@@ -10,7 +10,8 @@ extension ReducedStoreSignal<S> on Signal<S> {
 
   void dispatch(Event<S> event) => value = event(value);
 
-  ReducedStore<S> get store => ReducedStoreProxy(getState, dispatch, this);
+  ReducedStoreProxy<S> get proxy =>
+      ReducedStoreProxy(getState, dispatch, this);
 }
 
 extension ExtensionSignalOnBuildContext on BuildContext {

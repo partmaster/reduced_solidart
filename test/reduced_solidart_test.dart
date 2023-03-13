@@ -11,17 +11,17 @@ class CounterIncremented extends Event<int> {
 
 void main() {
   test('Signal state 0', () {
-    final objectUnderTest = Signal(0).store;
+    final objectUnderTest = Signal(0).proxy;
     expect(objectUnderTest.state, 0);
   });
 
   test('Signal state 1', () {
-    final objectUnderTest = Signal(1).store;
+    final objectUnderTest = Signal(1).proxy;
     expect(objectUnderTest.state, 1);
   });
 
   test('Signal dispatch', () async {
-    final objectUnderTest = Signal(0).store;
+    final objectUnderTest = Signal(0).proxy;
     objectUnderTest.dispatch(CounterIncremented());
     expect(objectUnderTest.state, 1);
   });

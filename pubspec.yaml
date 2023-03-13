@@ -1,5 +1,5 @@
 name: reduced_solidart
-version: 0.3.2
+version: 0.3.3
 description: Implementation of the state management API 'reduced' on top of the state management framework 'Solidart'.
 homepage: https://github.com/partmaster/reduced_solidart
 repository: https://github.com/partmaster/reduced_solidart.git
