@@ -22,7 +22,7 @@ void main() {
 
   test('Signal dispatch', () async {
     final objectUnderTest = Signal(0).proxy;
-    objectUnderTest.dispatch(CounterIncremented());
+    objectUnderTest.process(CounterIncremented());
     expect(objectUnderTest.state, 1);
   });
 }

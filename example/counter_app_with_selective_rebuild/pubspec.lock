@@ -126,19 +126,18 @@ packages:
   reduced:
     dependency: "direct main"
     description:
-      path: "."
-      ref: "v0.3.0"
-      resolved-ref: "03a5357d0566e0537811a5515080aa8cbdee4ff4"
-      url: "https://github.com/partmaster/reduced"
-    source: git
-    version: "0.3.0"
+      name: reduced
+      sha256: e043c9185f8d0cf1c90543955aae3d55c4700e4847305ccce3cbacec6dd76061
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.0"
   reduced_solidart:
     dependency: "direct main"
     description:
       path: "../.."
       relative: true
     source: path
-    version: "0.3.0"
+    version: "0.4.0"
   sky_engine:
     dependency: transitive
     description: flutter

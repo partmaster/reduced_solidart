@@ -8,10 +8,9 @@ import 'package:reduced/reduced.dart';
 extension ReducedStoreSignal<S> on Signal<S> {
   S getState() => value;
 
-  void dispatch(Event<S> event) => value = event(value);
+  void process(Event<S> event) => value = event(value);
 
-  ReducedStoreProxy<S> get proxy =>
-      ReducedStoreProxy(getState, dispatch, this);
+  StoreProxy<S> get proxy => StoreProxy(getState, process, this);
 }
 
 extension ExtensionSignalOnBuildContext on BuildContext {

@@ -1,4 +1,4 @@
-// transformer.dart
+// mappers.dart
 
 import 'package:reduced/reduced.dart';
 
@@ -6,17 +6,21 @@ import 'props.dart';
 import 'events.dart';
 import 'state.dart';
 
-MyHomePageProps transformMyHomePageProps(
-  ReducedStore<MyAppState> store,
-) =>
-    MyHomePageProps(
-      onPressed: CallableAdapter(store, CounterIncremented.instance),
-      title: store.state.title,
-    );
+class MyHomePagePropsMapper extends MyHomePageProps {
+  MyHomePagePropsMapper(
+    MyAppState state,
+    EventProcessor<MyAppState> processor,
+  ) : super(
+          onPressed: EventCarrier(processor, CounterIncremented.instance),
+          title: state.title,
+        );
+}
 
-MyCounterWidgetProps transformMyCounterWidgetProps(
-  ReducedStore<MyAppState> store,
-) =>
-    MyCounterWidgetProps(
-      counterText: '${store.state.counter}',
-    );
+class MyCounterWidgetPropsMapper extends MyCounterWidgetProps {
+  MyCounterWidgetPropsMapper(
+    MyAppState state,
+    EventProcessor<MyAppState> processor,
+  ) : super(
+          counterText: '${state.counter}',
+        );
+}

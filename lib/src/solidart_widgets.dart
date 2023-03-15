@@ -9,59 +9,13 @@ import 'package:reduced/reduced.dart';
 import 'inherited_widgets.dart';
 import 'solidart_store.dart';
 
-typedef EventListener<S> = void Function(
-  ReducedStore<S> store,
-  Event<S> event,
-  DateTime timestamp,
-);
-
-class EventListenerDecorator<S> {
-  final EventListener<S> decorated;
-  DateTime? _timestamp;
-  Event<S>? _event;
-
-  EventListenerDecorator(this.decorated);
-  void call(
-      ReducedStore<S> store, Event<S> event, DateTime timestamp) {
-    if (timestamp != _timestamp || event != _event) {
-      _timestamp = timestamp;
-      _event = event;
-      decorated(store, event, timestamp);
-    }
-  }
-}
-
-class ReducedStoreProxyDecorator<S> extends ReducedStoreProxy<S> {
-  ReducedStoreProxyDecorator(
-      ReducedStoreProxy decorated, this.onEventDispatched)
-      : super(
-          () => decorated.state,
-          decorated.dispatch,
-          decorated.identity,
-        );
-  final EventListener<S>? onEventDispatched;
-
-  @override
-  dispatch(event) {
-    super.dispatch(event);
-    onEventDispatched?.call(this, event, DateTime.now());
-  }
-}
-
-EventListener<S>? _decorate<S>(EventListener<S>? decorated) {
-  if (decorated == null) {
-    return null;
-  }
-  return EventListenerDecorator<S>(decorated);
-}
-
 class ReducedProvider<S> extends StatelessWidget {
   ReducedProvider({
     super.key,
     required this.initialState,
-    EventListener<S>? onEventDispatched,
     required this.child,
-  }) : _onEventDispatched = _decorate(onEventDispatched);
+    EventListener<S>? onEventDispatched,
+  }) : _onEventDispatched = DistinctEventListener.decorate(onEventDispatched);
 
   final S initialState;
   final Widget child;
@@ -85,12 +39,12 @@ extension EventListenerOnBuildContext on BuildContext {
 class ReducedConsumer<S, P> extends StatelessWidget {
   const ReducedConsumer({
     super.key,
-    required this.transformer,
+    required this.mapper,
     required this.builder,
   });
 
-  final ReducedTransformer<S, P> transformer;
-  final ReducedWidgetBuilder<P> builder;
+  final StateToPropsMapper<S, P> mapper;
+  final WidgetFromPropsBuilder<P> builder;
 
   @override
   Widget build(BuildContext context) => _build(
@@ -98,14 +52,16 @@ class ReducedConsumer<S, P> extends StatelessWidget {
         context.onEventDispatched<S>(),
       );
 
-  Widget _build(
-          Signal<S> signal, EventListener<S>? onEventDispatched) =>
+  Widget _build(Signal<S> signal, EventListener<S>? onEventDispatched) =>
       SignalBuilder<P>(
         signal: SignalSelector<S, P>(
           signal: signal,
-          selector: (_) => transformer(
-            ReducedStoreProxyDecorator(
-              signal.proxy,
+          selector: (_) => mapper(
+            signal.getState(),
+            StoreProxy(
+              () => signal.getState(),
+              signal.proxy.process,
+              signal,
               onEventDispatched,
             ),
           ),
@@ -113,4 +69,23 @@ class ReducedConsumer<S, P> extends StatelessWidget {
         ),
         builder: (_, P value, ___) => builder(props: value),
       );
+}
+
+class DistinctEventListener<S> {
+  final EventListener<S> decorated;
+  UniqueKey? _key;
+
+  DistinctEventListener(this.decorated);
+
+  void call(Store<S> store, Event<S> event, UniqueKey key) {
+    if (key != _key) {
+      _key = key;
+      decorated(store, event, key);
+    }
+  }
+
+  static EventListener<S>? decorate<S>(
+    EventListener<S>? decorated,
+  ) =>
+      decorated == null ? null : DistinctEventListener<S>(decorated).call;
 }

@@ -127,17 +127,17 @@ packages:
     dependency: "direct main"
     description:
       name: reduced
-      sha256: "360116c142496744ae7a93f74119ecff3654fe47f515f12b55c64ea75120adc8"
+      sha256: e043c9185f8d0cf1c90543955aae3d55c4700e4847305ccce3cbacec6dd76061
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.2"
+    version: "0.4.0"
   reduced_solidart:
     dependency: "direct main"
     description:
       path: "../.."
       relative: true
     source: path
-    version: "0.3.3"
+    version: "0.4.0"
   sky_engine:
     dependency: transitive
     description: flutter

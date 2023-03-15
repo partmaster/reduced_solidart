@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:reduced/reduced.dart';
+import 'package:reduced/callbacks.dart';
 
 class CounterIncremented extends Event<int> {
   @override
@@ -9,16 +10,18 @@ class CounterIncremented extends Event<int> {
 }
 
 class Props {
-  Props({required this.counterText, required this.onPressed});
+  const Props({required this.counterText, required this.onPressed});
+
   final String counterText;
-  final Callable<void> onPressed;
+  final VoidCallable onPressed;
 }
 
-class PropsTransformer {
-  static Props transform(ReducedStore<int> store) => Props(
-        counterText: '${store.state}',
-        onPressed: CallableAdapter(store, CounterIncremented()),
-      );
+class PropsMapper extends Props {
+  PropsMapper(int state, EventProcessor<int> processor)
+      : super(
+          counterText: '$state',
+          onPressed: EventCarrier(processor, CounterIncremented()),
+        );
 }
 
 class MyHomePage extends StatelessWidget {
@@ -28,7 +31,9 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('reduced_solidart example')),
+        appBar: AppBar(
+          title: const Text('reduced_setstate example'),
+        ),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

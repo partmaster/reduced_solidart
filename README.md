@@ -7,27 +7,26 @@
 
 Implementation of the 'reduced' API for the 'Solidart' state management framework with following features:
 
-1. Implementation of the ```ReducedStore``` interface 
-2. Extension on the ```BuildContext``` for convenient access to the  ```ReducedStore``` instance.
+1. Implementation of the ```Store``` interface 
+2. Extension on the ```BuildContext``` for convenient access to the  ```Store``` instance.
 3. Register a state for management.
 4. Trigger a rebuild on widgets selectively after a state change.
 
 ## Features
 
-#### 1. Implementation of the ```ReducedStore``` interface 
+#### 1. Implementation of the ```Store``` interface 
 
 ```dart
 extension ReducedStoreSignal<S> on Signal<S> {
   S getState() => value;
 
-  void reduce(Reducer<S> reducer) => value = reducer(value);
+  void process(Event<S> event) => value = event(value);
 
-  ReducedStore<S> get store =>
-      ReducedStoreProxy(getState, reduce, this);
+  StoreProxy<S> get proxy => StoreProxy(getState, process, this);
 }
 ```
 
-#### 2. Extension on the ```BuildContext``` for convenient access to the  ```ReducedStore``` instance.
+#### 2. Extension on the ```BuildContext``` for convenient access to the  ```Store``` instance.
 
 ```dart
 extension ExtensionSignalOnBuildContext on BuildContext {
@@ -39,19 +38,24 @@ extension ExtensionSignalOnBuildContext on BuildContext {
 
 ```dart
 class ReducedProvider<S> extends StatelessWidget {
-  const ReducedProvider({
+  ReducedProvider({
     super.key,
     required this.initialState,
     required this.child,
-  });
+    EventListener<S>? onEventDispatched,
+  }) : _onEventDispatched = _decorate(onEventDispatched);
 
   final S initialState;
   final Widget child;
+  final EventListener<S>? _onEventDispatched;
 
   @override
-  Widget build(BuildContext context) => Solid(
-        signals: {S: () => createSignal<S>(initialState)},
-        child: child,
+  Widget build(BuildContext context) => InheritedValueWidget(
+        value: _onEventDispatched,
+        child: Solid(
+          signals: {S: () => createSignal<S>(initialState)},
+          child: child,
+        ),
       );
 }
 ```
@@ -62,20 +66,33 @@ class ReducedProvider<S> extends StatelessWidget {
 class ReducedConsumer<S, P> extends StatelessWidget {
   const ReducedConsumer({
     super.key,
-    required this.transformer,
+    required this.mapper,
     required this.builder,
   });
 
-  final ReducedTransformer<S, P> transformer;
-  final ReducedWidgetBuilder<P> builder;
+  final StateToPropsMapper<S, P> mapper;
+  final WidgetFromPropsBuilder<P> builder;
 
   @override
-  Widget build(BuildContext context) => _build(context.signal<S>());
+  Widget build(BuildContext context) => _build(
+        context.signal<S>(),
+        context.onEventDispatched<S>(),
+      );
 
-  Widget _build(Signal<S> signal) => SignalBuilder<P>(
+  Widget _build(
+          Signal<S> signal, EventListener<S>? onEventDispatched) =>
+      SignalBuilder<P>(
         signal: SignalSelector<S, P>(
           signal: signal,
-          selector: (_) => transformer(signal.store),
+          selector: (_) => mapper(
+            signal.getState(),
+            StoreProxy(
+              () => signal.getState(),
+              signal.proxy.process,
+              signal,
+              onEventDispatched,
+            ),
+          ),
           options: SignalOptions(comparator: (a, b) => a == b),
         ),
         builder: (_, P value, ___) => builder(props: value),
@@ -89,8 +106,11 @@ In the pubspec.yaml add dependencies on the package 'reduced' and on the package
 
 ```
 dependencies:
-  reduced: 0.2.1
-  reduced_solidart: 0.2.1
+  reduced: 0.4.0
+  reduced_solidart: 
+    git:
+      url: https://github.com/partmaster/reduced_solidart.git
+      ref: v0.4.0
 ```
 
 Import package 'reduced' to implement the logic.
@@ -114,23 +134,26 @@ Implementation of the counter demo app logic with the 'reduced' API without furt
 
 import 'package:flutter/material.dart';
 import 'package:reduced/reduced.dart';
+import 'package:reduced/callbacks.dart';
 
-class Incrementer extends Reducer<int> {
+class CounterIncremented extends Event<int> {
   @override
   int call(int state) => state + 1;
 }
 
 class Props {
-  Props({required this.counterText, required this.onPressed});
+  const Props({required this.counterText, required this.onPressed});
+
   final String counterText;
-  final Callable<void> onPressed;
+  final VoidCallable onPressed;
 }
 
-class PropsTransformer {
-  static Props transform(ReducedStore<int> store) => Props(
-        counterText: '${store.state}',
-        onPressed: CallableAdapter(store, Incrementer()),
-      );
+class PropsMapper extends Props {
+  PropsMapper(int state, EventProcessor<int> processor)
+      : super(
+          counterText: '$state',
+          onPressed: EventCarrier(processor, CounterIncremented()),
+        );
 }
 
 class MyHomePage extends StatelessWidget {
@@ -140,7 +163,9 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('reduced_solidart example')),
+        appBar: AppBar(
+          title: const Text('reduced_setstate example'),
+        ),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -181,7 +206,7 @@ class MyApp extends StatelessWidget {
         child: MaterialApp(
           theme: ThemeData(primarySwatch: Colors.blue),
           home: const ReducedConsumer(
-            transformer: PropsTransformer.transform,
+            mapper: PropsMapper.new,
             builder: MyHomePage.new,
           ),
         ),
