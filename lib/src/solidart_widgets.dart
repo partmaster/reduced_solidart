@@ -2,6 +2,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_solidart/flutter_solidart.dart';
+import 'package:reduced/proxy.dart';
 // ignore: implementation_imports
 import 'package:solidart/src/core/signal_selector.dart';
 import 'package:reduced/reduced.dart';
@@ -71,6 +72,9 @@ class ReducedConsumer<S, P> extends StatelessWidget {
       );
 }
 
+/// A decorator for an [EventListener] that skips events if they are equal to the previous event.
+///
+///
 class DistinctEventListener<S> {
   final EventListener<S> decorated;
   UniqueKey? _key;

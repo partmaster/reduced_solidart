@@ -3,6 +3,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_solidart/flutter_solidart.dart';
 import 'package:reduced/reduced.dart';
+import 'package:reduced/proxy.dart';
 
 /// Extension on class [Signal] with support of the [ReducedStore] interface.
 extension ReducedStoreSignal<S> on Signal<S> {

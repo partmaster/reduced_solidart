@@ -1,5 +1,5 @@
 name: reduced_solidart
-version: 0.4.0
+version: 0.4.1
 description: Implementation of the state management API 'reduced' on top of the state management framework 'Solidart'.
 homepage: https://github.com/partmaster/reduced_solidart
 repository: https://github.com/partmaster/reduced_solidart.git
@@ -13,11 +13,11 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_solidart: ^0.3.0
-  reduced: 0.4.0
-#  reduced: 
-#    git:
-#      url: https://github.com/partmaster/reduced.git
-#      ref: v0.3.0
+#  reduced: 0.4.1
+  reduced: 
+    git:
+      url: https://github.com/partmaster/reduced.git
+      ref: v0.4.1-beta.4
   solidart: ^0.2.2
 
 dev_dependencies:
